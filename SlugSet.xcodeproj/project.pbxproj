@@ -15,6 +15,9 @@
 		C6F497331C9678A500367C57 /* SlugSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F497321C9678A500367C57 /* SlugSetTests.swift */; };
 		C6F4973D1C9679E900367C57 /* slug_set_title.png in Resources */ = {isa = PBXBuildFile; fileRef = C6F4973C1C9679E900367C57 /* slug_set_title.png */; };
 		C6F4973F1C96828C00367C57 /* SoloMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F4973E1C96828C00367C57 /* SoloMode.swift */; };
+		C6F497431C9F233500367C57 /* goBack.png in Resources */ = {isa = PBXBuildFile; fileRef = C6F497421C9F233500367C57 /* goBack.png */; };
+		C6F497451C9F28E300367C57 /* SegueFromLeft.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F497441C9F28E300367C57 /* SegueFromLeft.swift */; };
+		C6F497491C9F487D00367C57 /* StyleConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F497481C9F487D00367C57 /* StyleConstants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +43,9 @@
 		C6F497321C9678A500367C57 /* SlugSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlugSetTests.swift; sourceTree = "<group>"; };
 		C6F4973C1C9679E900367C57 /* slug_set_title.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = slug_set_title.png; sourceTree = "<group>"; };
 		C6F4973E1C96828C00367C57 /* SoloMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SoloMode.swift; sourceTree = "<group>"; };
+		C6F497421C9F233500367C57 /* goBack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = goBack.png; sourceTree = "<group>"; };
+		C6F497441C9F28E300367C57 /* SegueFromLeft.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegueFromLeft.swift; sourceTree = "<group>"; };
+		C6F497481C9F487D00367C57 /* StyleConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StyleConstants.swift; path = Constants/StyleConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +87,7 @@
 		C6F497191C9678A400367C57 /* SlugSet */ = {
 			isa = PBXGroup;
 			children = (
+				C6F497471C9F482A00367C57 /* Constants */,
 				C6F4971C1C9678A400367C57 /* AppDelegate.swift */,
 				C6F4971E1C9678A400367C57 /* MainScreen.swift */,
 				C6F4973E1C96828C00367C57 /* SoloMode.swift */,
@@ -88,6 +95,7 @@
 				C6F497231C9678A500367C57 /* Images.xcassets */,
 				C6F497251C9678A500367C57 /* LaunchScreen.xib */,
 				C6F4971A1C9678A400367C57 /* Supporting Files */,
+				C6F497441C9F28E300367C57 /* SegueFromLeft.swift */,
 			);
 			path = SlugSet;
 			sourceTree = "<group>";
@@ -96,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				C6F4973C1C9679E900367C57 /* slug_set_title.png */,
+				C6F497421C9F233500367C57 /* goBack.png */,
 				C6F4971B1C9678A400367C57 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -116,6 +125,14 @@
 				C6F497311C9678A500367C57 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		C6F497471C9F482A00367C57 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				C6F497481C9F487D00367C57 /* StyleConstants.swift */,
+			);
+			name = Constants;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,6 +216,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C6F4973D1C9679E900367C57 /* slug_set_title.png in Resources */,
+				C6F497431C9F233500367C57 /* goBack.png in Resources */,
 				C6F497221C9678A500367C57 /* Main.storyboard in Resources */,
 				C6F497271C9678A500367C57 /* LaunchScreen.xib in Resources */,
 				C6F497241C9678A500367C57 /* Images.xcassets in Resources */,
@@ -219,8 +237,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6F497491C9F487D00367C57 /* StyleConstants.swift in Sources */,
 				C6F4973F1C96828C00367C57 /* SoloMode.swift in Sources */,
 				C6F4971F1C9678A400367C57 /* MainScreen.swift in Sources */,
+				C6F497451C9F28E300367C57 /* SegueFromLeft.swift in Sources */,
 				C6F4971D1C9678A400367C57 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

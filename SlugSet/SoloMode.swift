@@ -9,11 +9,34 @@
 import UIKit
 
 class SoloMode: UIViewController {
+    
+    @IBOutlet weak var cardR0C0: UIButton!
+    @IBOutlet weak var cardR0C1: UIButton!
+    @IBOutlet weak var cardR0C2: UIButton!
+    @IBOutlet weak var cardR1C0: UIButton!
+    @IBOutlet weak var cardR1C1: UIButton!
+    @IBOutlet weak var cardR1C2: UIButton!
+    @IBOutlet weak var cardR2C0: UIButton!
+    @IBOutlet weak var cardR2C1: UIButton!
+    @IBOutlet weak var cardR2C2: UIButton!
+    @IBOutlet weak var cardR3C0: UIButton!
+    @IBOutlet weak var cardR3C1: UIButton!
+    @IBOutlet weak var cardR3C2: UIButton!
+    
+    var cardsOnBoard: [UIButton]!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        cardsOnBoard = [cardR0C0,cardR0C1,cardR0C2,cardR1C0,cardR1C1,cardR1C2,
+                        cardR2C0,cardR2C1,cardR2C2,cardR3C0,cardR3C1,cardR3C2]
+        
+        for card in cardsOnBoard {
+            card.layer.cornerRadius = 10
+            card.layer.borderWidth = 2
+            card.layer.borderColor = StyleConstants.grayBorder.CGColor
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -22,27 +45,23 @@ class SoloMode: UIViewController {
     }
     
     @IBAction func goBackPressed(sender: AnyObject) {
-        let test = UIBarButtonItem(title: "test", style: UIBarButtonItemStyle.Done, target: self, action: nil)
-//        test.setValue("fromNickel", forKey: "testing")
-        test.tag = 25
-//        var another = test.valueForKey("testing") as! String
-        println(test.tag)
-        
-
-        
-        
-//        self.dismissViewControllerAnimated(true, completion: nil)
+        self.navigationController?.popViewControllerAnimated(true)
         
     }
+    
+    @IBAction func aCardPressed(sender: UIButton) {
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        // If card is currently selected, then deselect it
+        // tag == 1 means card is currently selected
+        if sender.tag == 1 {
+            sender.layer.borderColor = StyleConstants.grayBorder.CGColor
+            sender.tag = 0
+        } else {
+            sender.layer.borderColor = StyleConstants.blueBorder.CGColor
+            sender.tag = 1
+        }
     }
-    */
-
+    
 }
+
+
