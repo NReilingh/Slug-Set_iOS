@@ -10,6 +10,11 @@ import UIKit
 
 class SoloMode: UIViewController {
     
+    // MARK: Properties
+    
+    @IBOutlet weak var setsAvailable: UILabel!
+    @IBOutlet weak var cardsOnDeck: UILabel!
+    
     @IBOutlet weak var cardR0C0: UIButton!
     @IBOutlet weak var cardR0C1: UIButton!
     @IBOutlet weak var cardR0C2: UIButton!
@@ -22,45 +27,45 @@ class SoloMode: UIViewController {
     @IBOutlet weak var cardR3C0: UIButton!
     @IBOutlet weak var cardR3C1: UIButton!
     @IBOutlet weak var cardR3C2: UIButton!
+    var cardButtons: [UIButton]!
     
-    var cardsOnBoard: [UIButton]!
+    var myDeck = Deck()
+    var deck: [String] = []
+    var cardCodesOnBoard: [String] = []
+    
 
+    
+    // MARK: Overrides
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        cardsOnBoard = [cardR0C0,cardR0C1,cardR0C2,cardR1C0,cardR1C1,cardR1C2,
+        cardButtons = [cardR0C0,cardR0C1,cardR0C2,cardR1C0,cardR1C1,cardR1C2,
                         cardR2C0,cardR2C1,cardR2C2,cardR3C0,cardR3C1,cardR3C2]
         
-        for card in cardsOnBoard {
+        for card in cardButtons {
             card.layer.cornerRadius = 10
             card.layer.borderWidth = 2
             card.layer.borderColor = StyleConstants.grayBorder.CGColor
         }
         
-//        cardR3C2.setImage(UIImage(named: "card1yse.png"), forState: UIControlState.Normal)
-        cardR3C2.setBackgroundImage(UIImage(named: "card1yse"), forState: UIControlState.Normal)
-        cardR3C1.setBackgroundImage(UIImage(named: "card3yse"), forState: UIControlState.Normal)
-//        cardR3C2.imageView?.image = UIImage(named: "card1yse.png")
-        
-//        println(CardPaths)
-        println(CardPaths.path["1GDD"])
-        var myDeck = Deck()
         myDeck.shuffleDeck()
-//        var deck = myDeck.deck
+        deck = myDeck.deck
         
-        let path = CardPaths.path[myDeck.deck[0]]
-        
-        
-        
-        cardR0C0.setBackgroundImage(UIImage(named: path!), forState: UIControlState.Normal)
+        loadNext12CardsCodes()
+        setButtonsCodesAndImages()
+        updateCounters()
         
         
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    
+    // MARK: Button Actions
     
     @IBAction func goBackPressed(sender: AnyObject) {
         self.navigationController?.popViewControllerAnimated(true)
@@ -79,6 +84,33 @@ class SoloMode: UIViewController {
             sender.tag = 1
         }
     }
+    
+    
+    // MARK: Helper Methods
+    
+    // Removes the next 12 card codes from deck and adds them into cardCodesOnBoard
+    func loadNext12CardsCodes() {
+        for i in 1...12 {
+            cardCodesOnBoard.append(deck.removeAtIndex(0))
+        }
+    }
+    
+    // Sets the card code to the Button as the button title text
+    // and then sets the card image based on the card code just set
+    func setButtonsCodesAndImages() {
+        for (i,code) in enumerate(cardCodesOnBoard) {
+            cardButtons[i].setTitle(code, forState: .Normal)
+            var cardPath = CardPaths.path[code]!
+            cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+        }
+    }
+    
+    // FIXME:
+    // Updates the labels of setsAvailable and cardsOnDeck
+    func updateCounters() {
+        cardsOnDeck.text = String(deck.count)
+    }
+
     
 }
 
