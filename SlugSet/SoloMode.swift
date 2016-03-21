@@ -33,6 +33,8 @@ class SoloMode: UIViewController {
     var deck: [String] = []
     var cardCodesOnBoard: [String] = []
     
+    var selectedCards = [String:UIButton]()
+    
 
     
     // MARK: Overrides
@@ -79,10 +81,48 @@ class SoloMode: UIViewController {
         if sender.tag == 1 {
             sender.layer.borderColor = StyleConstants.grayBorder.CGColor
             sender.tag = 0
+            
+            selectedCards.removeValueForKey(sender.currentTitle!)
+            
         } else {
             sender.layer.borderColor = StyleConstants.blueBorder.CGColor
             sender.tag = 1
+            
+            selectedCards[sender.currentTitle!] = sender
+            
         }
+        
+        
+        if selectedCards.count == 3 {
+            let codes: [String] = Array(selectedCards.keys)
+            // Check if they are a set
+            if checkSet(card1: codes[0], card2: codes[1], card3: codes[2]) {
+                println("they are a set")
+                
+                for (k, v) in selectedCards {
+                    v.tag = 0
+                    v.layer.borderColor = StyleConstants.grayBorder.CGColor
+                }
+            }
+            // They are not a set
+            else {
+                println("not a set")
+                
+                for (k, v) in selectedCards {
+                    v.tag = 0
+                    v.layer.borderColor = StyleConstants.grayBorder.CGColor
+                    v.shake()
+                }
+                
+            }
+            
+            
+            selectedCards.removeAll()
+            
+            
+            
+        }
+        
     }
     
     
@@ -110,8 +150,45 @@ class SoloMode: UIViewController {
     func updateCounters() {
         cardsOnDeck.text = String(deck.count)
     }
+    
+    
+    
+    // Check all 4 attributes of cards one by one and check
+    // to see if they are all the same or all different
+    func checkSet(#card1: String, card2: String, card3: String) -> Bool {
+        if (card1 == "0" || card2 == "0" || card3 == "0") {
+            return false
+        }
+        var set = true
+        let abcd = "abcd" // String with 4 chars for counting index in for-loop
+        for ( var i=0; (set && i<4); i++) {
+            var index = advance(abcd.startIndex, i)
+            set = checkAttributes(a: card1[index], b: card2[index], c: card3[index])
+        }
+        
+        return set
+    }
+    
+    // Check whether the passed attribute is the same or different for all 3 cards
+    func checkAttributes(#a: Character, b: Character, c: Character) -> Bool {
+        return ( (a == b && a == c) || ((a != b) && (a != c) && (b != c)) )
+    }
+    
 
     
+}
+
+
+// Shake function used when the 3 cards selected are not a set
+// http://stackoverflow.com/questions/27987048/shake-animation-for-uitextfield-uiview-in-swift
+extension UIView {
+    func shake() {
+        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+        animation.duration = 0.4
+        animation.values = [-15.0, 15.0, -5.0, 5.0, 0.0 ]
+        layer.addAnimation(animation, forKey: "shake")
+    }
 }
 
 
