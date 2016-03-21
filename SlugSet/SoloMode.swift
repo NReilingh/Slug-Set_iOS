@@ -37,6 +37,11 @@ class SoloMode: UIViewController {
             card.layer.borderColor = StyleConstants.grayBorder.CGColor
         }
         
+//        cardR3C2.setImage(UIImage(named: "card1yse.png"), forState: UIControlState.Normal)
+        cardR3C2.setBackgroundImage(UIImage(named: "card1yse.png"), forState: UIControlState.Normal)
+        cardR3C1.setBackgroundImage(UIImage(named: "card3yse.png"), forState: UIControlState.Normal)
+//        cardR3C2.imageView?.image = UIImage(named: "card1yse.png")
+        
     }
 
     override func didReceiveMemoryWarning() {
