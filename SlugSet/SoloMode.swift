@@ -38,9 +38,22 @@ class SoloMode: UIViewController {
         }
         
 //        cardR3C2.setImage(UIImage(named: "card1yse.png"), forState: UIControlState.Normal)
-        cardR3C2.setBackgroundImage(UIImage(named: "card1yse.png"), forState: UIControlState.Normal)
-        cardR3C1.setBackgroundImage(UIImage(named: "card3yse.png"), forState: UIControlState.Normal)
+        cardR3C2.setBackgroundImage(UIImage(named: "card1yse"), forState: UIControlState.Normal)
+        cardR3C1.setBackgroundImage(UIImage(named: "card3yse"), forState: UIControlState.Normal)
 //        cardR3C2.imageView?.image = UIImage(named: "card1yse.png")
+        
+//        println(CardPaths)
+        println(CardPaths.path["1GDD"])
+        var myDeck = Deck()
+        myDeck.shuffleDeck()
+//        var deck = myDeck.deck
+        
+        let path = CardPaths.path[myDeck.deck[0]]
+        
+        
+        
+        cardR0C0.setBackgroundImage(UIImage(named: path!), forState: UIControlState.Normal)
+        
         
     }
 
