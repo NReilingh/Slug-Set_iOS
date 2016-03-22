@@ -79,53 +79,37 @@ class SoloMode: UIViewController {
     
     @IBAction func goBackPressed(sender: AnyObject) {
         self.navigationController?.popViewControllerAnimated(true)
-        
     }
     
     @IBAction func aCardPressed(sender: UIButton) {
-
-        // If card is currently selected, then deselect it
-        // tag == 1 means card is currently selected
+        // Remove or add the blue border as needed
         if sender.tag == 1 {
-            sender.layer.borderColor = StyleConstants.grayBorder.CGColor
-            sender.tag = 0
-            
-            selectedCards.removeValueForKey(sender.currentTitle!)
-            
+            removeBlueBorderFrom(sender)
         } else {
-            sender.layer.borderColor = StyleConstants.blueBorder.CGColor
-            sender.tag = 1
-            
-            selectedCards[sender.currentTitle!] = sender
-            
+            addBlueBorderTo(sender)
         }
         
         
         if selectedCards.count == 3 {
+            removeOrangeBorderFromCards()
+            
             let codes: [String] = Array(selectedCards.keys)
             // Check if they are a set
             if checkSet(card1: codes[0], card2: codes[1], card3: codes[2]) {
                 println("they are a set")
                 
-                for (k, v) in selectedCards {
-                    v.tag = 0
-                    v.layer.borderColor = StyleConstants.grayBorder.CGColor
-                }
             }
             // They are not a set
             else {
                 println("not a set")
                 
                 for (k, v) in selectedCards {
-                    v.tag = 0
-                    v.layer.borderColor = StyleConstants.grayBorder.CGColor
                     v.shake()
                 }
                 
             }
             
-            
-            selectedCards.removeAll()
+            removeBlueBorderFromCards()
             
             
             
@@ -134,6 +118,8 @@ class SoloMode: UIViewController {
     }
     
     @IBAction func shuffleButtonPressed(sender: AnyObject) {
+        removeBlueBorderFromCards()
+        removeOrangeBorderFromCards()
         shuffleDeck()
         
         // If after shuffling there are no sets on board, keep shuffling
@@ -146,24 +132,19 @@ class SoloMode: UIViewController {
         updateCountersOnBoard()
     }
     
+    //ONLY shows the first 3 hints of the first set found
     @IBAction func hintButtonPressed(sender: AnyObject) {
-        //ONLY show the first 3 hints for the first set available
+        removeBlueBorderFromCards()
         
-        // All 3 hints have been shown already, therefore clear them all
-        if hintsShownOnBoard == 2 {
-            // remove hinted cards
+        // Remove all hints
+        if hintsShownOnBoard == 2 { // 0,1,2 three hints
+            removeOrangeBorderFromCards()
         }
-        // Not all 3 hints have been shown, therefore show one
+        // Show the next hint
         else {
             hintsShownOnBoard++
-            for button in cardButtons {
-                if button.currentTitle! == sets[hintsShownOnBoard] {
-                    button.layer.borderColor = StyleConstants.orangeBorder.CGColor
-                    break
-                }
-            }
+            addOrangeBorderToNextCard()
         }
-        
     }
     
     @IBAction func newgameButtonPressed(sender: AnyObject) {
@@ -190,13 +171,11 @@ class SoloMode: UIViewController {
         }
     }
     
-    // Updates the labels of setsAvailable and cardsOnDeck
     func updateCountersOnBoard() {
         cardsOnDeck.text = String(deck.count)
         setsAvailable.text = String(countOfSets)
     }
     
-    // FIXME:
     func shuffleDeck() {
         // Add the cards on board back to the deck and shuffle it
         for card in cardCodesOnBoard {
@@ -207,18 +186,63 @@ class SoloMode: UIViewController {
         // Clear board of card codes and load it again
         cardCodesOnBoard.removeAll()
         loadCardCodesOnBoard()
-        
-        
-        //remove blue boder from selected cards
-        //empty out selected cards
-        //remove orange border from hint cards
-        
         loadButtonsCodesAndImages()
-        
-        
     }
     
     
+    // MARK: Color Border Logic
+    
+    func addBlueBorderTo(button: UIButton) {
+        button.layer.borderColor = StyleConstants.blueBorder.CGColor
+        button.tag = 1
+        
+        // Add the key-value ("code":Button) to the Dict
+        selectedCards[button.currentTitle!] = button
+    }
+    
+    func removeBlueBorderFrom(button: UIButton) {
+        button.layer.borderColor = StyleConstants.grayBorder.CGColor
+        button.tag = 0
+        
+        selectedCards.removeValueForKey(button.currentTitle!)
+    }
+    
+    func removeBlueBorderFromCards() {
+        // Get the codes from the selected cards dictionary
+        let codes: [String] = Array(selectedCards.keys)
+        // If its not empty, set the border of th button back to gray, and tag back to 0
+        if !codes.isEmpty {
+            for code in codes {
+                selectedCards[code]!.tag = 0
+                selectedCards[code]!.layer.borderColor = StyleConstants.grayBorder.CGColor
+            }
+        }
+        selectedCards.removeAll()
+    }
+    
+    func addOrangeBorderToNextCard() {
+        for button in cardButtons {
+            if button.currentTitle! == sets[hintsShownOnBoard] {
+                button.layer.borderColor = StyleConstants.orangeBorder.CGColor
+                button.tag = 0
+                break
+            }
+        }
+    }
+    
+    func removeOrangeBorderFromCards() {
+        if hintsShownOnBoard >= 0 {
+            for (var i=0; i<=hintsShownOnBoard; i++) {
+                for button in cardButtons {
+                    if button.currentTitle! == sets[i] {
+                        button.layer.borderColor = StyleConstants.grayBorder.CGColor
+                        break
+                    }
+                }
+            }
+        }
+        hintsShownOnBoard = -1
+    }
     
     
     // MARK: Set Logic
@@ -277,7 +301,7 @@ class SoloMode: UIViewController {
         return ( (a == b && a == c) || ((a != b) && (a != c) && (b != c)) )
     }
     
-}
+}// End of SoloMode class
 
 
 // Shake function used when the 3 cards selected are not a set
