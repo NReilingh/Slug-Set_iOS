@@ -360,6 +360,9 @@
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="hintButtonPressed:" destination="JFm-3U-Dmb" eventType="touchUpInside" id="Ycd-bz-szc"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FHt-eB-G9l">
                                         <rect key="frame" x="325" y="10" width="150" height="62"/>
@@ -368,6 +371,9 @@
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="shuffleButtonPressed:" destination="JFm-3U-Dmb" eventType="touchUpInside" id="FjB-Ue-xSh"/>
+                                        </connections>
                                     </button>
                                     <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6nU-SJ-hxx" userLabel="newGame">
                                         <rect key="frame" x="225" y="10" width="150" height="62"/>
@@ -376,6 +382,9 @@
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="newgameButtonPressed:" destination="JFm-3U-Dmb" eventType="touchUpInside" id="HfJ-IW-hlr"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <constraints>

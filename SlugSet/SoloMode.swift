@@ -35,9 +35,15 @@ class SoloMode: UIViewController {
     
     var selectedCards = [String:UIButton]()
     
+    var sets = [String]()
+    var countOfSets = 0
+    
+    var hintsShownOnBoard = -1
+    
+    
 
     
-    // MARK: Overrides
+    // MARK: - Overrides
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,9 +60,11 @@ class SoloMode: UIViewController {
         myDeck.shuffleDeck()
         deck = myDeck.deck
         
-        loadNext12CardsCodes()
-        setButtonsCodesAndImages()
-        updateCounters()
+        loadCardCodesOnBoard()
+        loadButtonsCodesAndImages()
+        
+        findSetsOnBoard()
+        updateCountersOnBoard()
         
         
     }
@@ -67,7 +75,7 @@ class SoloMode: UIViewController {
     }
     
     
-    // MARK: Button Actions
+    // MARK: - Button Actions
     
     @IBAction func goBackPressed(sender: AnyObject) {
         self.navigationController?.popViewControllerAnimated(true)
@@ -125,11 +133,48 @@ class SoloMode: UIViewController {
         
     }
     
+    @IBAction func shuffleButtonPressed(sender: AnyObject) {
+        shuffleDeck()
+        
+        // If after shuffling there are no sets on board, keep shuffling
+        var mySets = findSetsOnBoard()
+        while (mySets.count == 0) {
+            shuffleDeck()
+            mySets = findSetsOnBoard()
+        }
+        
+        updateCountersOnBoard()
+    }
     
-    // MARK: Helper Methods
+    @IBAction func hintButtonPressed(sender: AnyObject) {
+        //ONLY show the first 3 hints for the first set available
+        
+        // All 3 hints have been shown already, therefore clear them all
+        if hintsShownOnBoard == 2 {
+            // remove hinted cards
+        }
+        // Not all 3 hints have been shown, therefore show one
+        else {
+            hintsShownOnBoard++
+            for button in cardButtons {
+                if button.currentTitle! == sets[hintsShownOnBoard] {
+                    button.layer.borderColor = StyleConstants.orangeBorder.CGColor
+                    break
+                }
+            }
+        }
+        
+    }
+    
+    @IBAction func newgameButtonPressed(sender: AnyObject) {
+    }
+    
+    
+    
+    // MARK: - Helper Methods
     
     // Removes the next 12 card codes from deck and adds them into cardCodesOnBoard
-    func loadNext12CardsCodes() {
+    func loadCardCodesOnBoard() {
         for i in 1...12 {
             cardCodesOnBoard.append(deck.removeAtIndex(0))
         }
@@ -137,7 +182,7 @@ class SoloMode: UIViewController {
     
     // Sets the card code to the Button as the button title text
     // and then sets the card image based on the card code just set
-    func setButtonsCodesAndImages() {
+    func loadButtonsCodesAndImages() {
         for (i,code) in enumerate(cardCodesOnBoard) {
             cardButtons[i].setTitle(code, forState: .Normal)
             var cardPath = CardPaths.path[code]!
@@ -145,13 +190,71 @@ class SoloMode: UIViewController {
         }
     }
     
-    // FIXME:
     // Updates the labels of setsAvailable and cardsOnDeck
-    func updateCounters() {
+    func updateCountersOnBoard() {
         cardsOnDeck.text = String(deck.count)
+        setsAvailable.text = String(countOfSets)
+    }
+    
+    // FIXME:
+    func shuffleDeck() {
+        // Add the cards on board back to the deck and shuffle it
+        for card in cardCodesOnBoard {
+            deck.append(card)
+        }
+        deck.shuffle()
+        
+        // Clear board of card codes and load it again
+        cardCodesOnBoard.removeAll()
+        loadCardCodesOnBoard()
+        
+        
+        //remove blue boder from selected cards
+        //empty out selected cards
+        //remove orange border from hint cards
+        
+        loadButtonsCodesAndImages()
+        
+        
     }
     
     
+    
+    
+    // MARK: Set Logic
+    
+    // Finds and returns all sets on current board
+    // Updates the counter of number of sets available
+    func findSetsOnBoard() -> [String] {
+        countOfSets = 0
+        var set: Bool
+        
+        // Clear out the List of sets if needed
+        if (!sets.isEmpty) { sets.removeAll() }
+        
+        // Iterating over List of 12 cards with 3 different cursors
+        for (var spot1=0; spot1<cardCodesOnBoard.count-2; spot1++){ // First cursor starts at index 0
+            for (var spot2=spot1+1; spot2<cardCodesOnBoard.count-1; spot2++){ // Second cursor starts at first+1
+                for (var spot3=spot2+1; spot3<cardCodesOnBoard.count; spot3++){ // Third cursor starts at second+1
+                    
+                    // Checking all combinations of 3 cards
+                    set = checkSet(card1: cardCodesOnBoard[spot1], card2: cardCodesOnBoard[spot2], card3: cardCodesOnBoard[spot3])
+                    
+                    //If set found add it to List of sets
+                    if (set) {
+                        println("it is a set: \(cardCodesOnBoard[spot1]) \(cardCodesOnBoard[spot2]) \(cardCodesOnBoard[spot3])")
+                        sets.append(cardCodesOnBoard[spot1])
+                        sets.append(cardCodesOnBoard[spot2])
+                        sets.append(cardCodesOnBoard[spot3])
+                        
+                        countOfSets++;
+                    }
+                }
+            }
+        }
+        println()
+        return sets
+    }
     
     // Check all 4 attributes of cards one by one and check
     // to see if they are all the same or all different
@@ -173,8 +276,6 @@ class SoloMode: UIViewController {
     func checkAttributes(#a: Character, b: Character, c: Character) -> Bool {
         return ( (a == b && a == c) || ((a != b) && (a != c) && (b != c)) )
     }
-    
-
     
 }
 
