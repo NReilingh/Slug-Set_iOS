@@ -61,7 +61,7 @@ class SoloMode: UIViewController {
         deck = myDeck.deck
         
         loadCardCodesOnBoard()
-        loadButtonsCodesAndImages()
+        loadAllButtonsCodesAndImages()
         
         findSetsOnBoard()
         updateCountersOnBoard()
@@ -94,27 +94,38 @@ class SoloMode: UIViewController {
             removeOrangeBorderFromCards()
             
             let codes: [String] = Array(selectedCards.keys)
-            // Check if they are a set
+            // Check if the 3 selected cards are a set
             if checkSet(card1: codes[0], card2: codes[1], card3: codes[2]) {
-                println("they are a set")
+                // Grab 3 more cards codes from the deck if the deck allows it
+                if (deck.count >= 3) {
+                    var newCodes = loadNextThreeCards()
+                    updateButtonCodesAndImages(codes, newCodes: newCodes)
+                    updateCardCodesOnBoard(codes, newCodes: newCodes)
+                    
+                    // Find the new sets, and shuffle if needed
+                    var mySets = findSetsOnBoard()
+                    while (mySets.count == 0) {
+                        shuffleDeck()
+                        mySets = findSetsOnBoard()
+                    }
+                    
+                    updateCountersOnBoard()
+                    
+                }
+                // There are no more cards on the deck
+                else {
+                    
+                }
                 
             }
             // They are not a set
             else {
-                println("not a set")
-                
                 for (k, v) in selectedCards {
                     v.shake()
                 }
-                
             }
-            
             removeBlueBorderFromCards()
-            
-            
-            
         }
-        
     }
     
     @IBAction func shuffleButtonPressed(sender: AnyObject) {
@@ -160,14 +171,45 @@ class SoloMode: UIViewController {
             cardCodesOnBoard.append(deck.removeAtIndex(0))
         }
     }
-    
+
     // Sets the card code to the Button as the button title text
     // and then sets the card image based on the card code just set
-    func loadButtonsCodesAndImages() {
+    func loadAllButtonsCodesAndImages() {
         for (i,code) in enumerate(cardCodesOnBoard) {
             cardButtons[i].setTitle(code, forState: .Normal)
             var cardPath = CardPaths.path[code]!
             cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+        }
+    }
+    
+    func loadNextThreeCards() -> [String] {
+        var next3Cards: [String] = []
+        for i in 1...3 {
+            next3Cards.append(deck.removeAtIndex(0))
+        }
+        return next3Cards
+    }
+    
+    func updateButtonCodesAndImages(oldCodes:[String], newCodes:[String]) {
+        // Iterate through the old codes (the selected cards) and update the buttons with the new codes and images
+        for (i,code) in enumerate(oldCodes) {
+            var button: UIButton = selectedCards[code]!
+            button.setTitle(newCodes[i], forState: .Normal)
+            var cardPath = CardPaths.path[newCodes[i]]!
+            button.setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+            
+        }
+    }
+    
+    // Iterates through the old codes (selected cards) and traverses the array of buttons, once it finds the old code it replaces it with the new one
+    func updateCardCodesOnBoard(oldCodes:[String], newCodes:[String]) {
+        for (i, oldCode) in enumerate(oldCodes) {
+            for (j, code) in enumerate(cardCodesOnBoard) {
+                if code == oldCode {
+                    cardCodesOnBoard[j] = newCodes[i]
+                    break
+                }
+            }
         }
     }
     
@@ -186,7 +228,7 @@ class SoloMode: UIViewController {
         // Clear board of card codes and load it again
         cardCodesOnBoard.removeAll()
         loadCardCodesOnBoard()
-        loadButtonsCodesAndImages()
+        loadAllButtonsCodesAndImages()
     }
     
     
@@ -225,6 +267,7 @@ class SoloMode: UIViewController {
             if button.currentTitle! == sets[hintsShownOnBoard] {
                 button.layer.borderColor = StyleConstants.orangeBorder.CGColor
                 button.tag = 0
+                button.shake()
                 break
             }
         }
