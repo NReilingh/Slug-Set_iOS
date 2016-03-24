@@ -29,7 +29,7 @@ class SoloMode: UIViewController {
     @IBOutlet weak var cardR3C2: UIButton!
     var cardButtons: [UIButton]!
     
-    var myDeck = Deck()
+    var newDeck = Deck()
     var deck: [String] = []
     var cardCodesOnBoard: [String] = []
     
@@ -40,6 +40,9 @@ class SoloMode: UIViewController {
     
     var hintsShownOnBoard = -1
     
+    
+    
+    var gameEnded = false
     
 
     
@@ -57,16 +60,32 @@ class SoloMode: UIViewController {
             card.layer.borderColor = StyleConstants.grayBorder.CGColor
         }
         
-        myDeck.shuffleDeck()
-        deck = myDeck.deck
+        let defaults = NSUserDefaults.standardUserDefaults()
+        let gameInProgress = defaults.boolForKey("gameInProgress")
+        
+        if gameInProgress {
+            let data = defaults.objectForKey("savedDeck") as! NSData
+            deck = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as! [String]
+        }else{
+            newDeck.shuffleDeck()
+            deck = newDeck.deck
+        }
         
         loadCardCodesOnBoard()
         loadAllButtonsCodesAndImages()
         
         findSetsOnBoard()
         updateCountersOnBoard()
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        let defaults = NSUserDefaults.standardUserDefaults()
+        defaults.setBool(true, forKey: "gameInProgress")
         
-        
+        addCardsOnBoardBackToDeck()
+        let data = NSJSONSerialization.dataWithJSONObject(deck, options: nil, error: nil)
+        defaults.setObject(data, forKey: "savedDeck")
+        defaults.synchronize()
     }
     
     override func didReceiveMemoryWarning() {
@@ -216,6 +235,14 @@ class SoloMode: UIViewController {
     func updateCountersOnBoard() {
         cardsOnDeck.text = String(deck.count)
         setsAvailable.text = String(countOfSets)
+    }
+    
+    func addCardsOnBoardBackToDeck() {
+        // Need to reverse the order to add them in correct order on top of deck
+        let board = cardCodesOnBoard.reverse()
+        for card in board {
+            deck.insert(card, atIndex: 0)
+        }
     }
     
     func shuffleDeck() {
