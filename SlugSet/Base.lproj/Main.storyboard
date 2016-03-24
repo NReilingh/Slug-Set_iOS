@@ -375,9 +375,10 @@
                                             <action selector="shuffleButtonPressed:" destination="JFm-3U-Dmb" eventType="touchUpInside" id="FjB-Ue-xSh"/>
                                         </connections>
                                     </button>
-                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6nU-SJ-hxx" userLabel="newGame">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6nU-SJ-hxx" userLabel="newGame">
                                         <rect key="frame" x="225" y="10" width="150" height="62"/>
                                         <color key="backgroundColor" red="1" green="0.47450980392156861" blue="0.32549019607843138" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                         <state key="normal" title="new game">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -460,6 +461,7 @@
                         <outlet property="cardR3C2" destination="fMX-73-pmL" id="6up-HW-sKu"/>
                         <outlet property="cardsOnDeck" destination="2LW-Bu-qnp" id="OBj-SD-h06"/>
                         <outlet property="hintButton" destination="EwN-8u-WWZ" id="rk8-lM-OUf"/>
+                        <outlet property="newgameButton" destination="6nU-SJ-hxx" id="1Dm-qf-1bJ"/>
                         <outlet property="setsAvailable" destination="aIw-Dx-Bc8" id="FRY-lx-R39"/>
                         <outlet property="shuffleButton" destination="FHt-eB-G9l" id="65L-N4-5bF"/>
                     </connections>

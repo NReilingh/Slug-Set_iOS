@@ -32,6 +32,7 @@ class SoloMode: UIViewController {
     
     @IBOutlet weak var hintButton: UIButton!
     @IBOutlet weak var shuffleButton: UIButton!
+    @IBOutlet weak var newgameButton: UIButton!
     
     
     var newDeck = Deck()
@@ -46,18 +47,16 @@ class SoloMode: UIViewController {
     var hintsShownOnBoard = -1
     
     
-    
-    var gameEnded = false
-    
 
     
-    // MARK: - Overrides
+    // MARK: - VC Overrides
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         hintButton.alpha = 0
         shuffleButton.alpha = 0
+        newgameButton.alpha = 0
         
         cardButtons = [cardR0C0,cardR0C1,cardR0C2,cardR1C0,cardR1C1,cardR1C2,
                         cardR2C0,cardR2C1,cardR2C2,cardR3C0,cardR3C1,cardR3C2]
@@ -74,15 +73,13 @@ class SoloMode: UIViewController {
         if gameInProgress {
             let data = defaults.objectForKey("savedDeck") as! NSData
             deck = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as! [String]
+            loadCardCodesOnBoard()
         }else{
-            newDeck.shuffleDeck()
-            deck = newDeck.deck
+            startNewGame()
         }
-        
-        loadCardCodesOnBoard()
-        loadAllButtonsCodesAndImages()
-        
-        findSetsOnBoard()
+
+        loadAllButtonsCodesAndImages(fromNewGame: false)
+        checkIfGameEnded()
         updateCountersOnBoard()
     }
     
@@ -114,13 +111,11 @@ class SoloMode: UIViewController {
     }
     
     @IBAction func aCardPressed(sender: UIButton) {
-        // Remove or add the blue border as needed
         if sender.tag == 1 {
             removeBlueBorderFrom(sender)
         } else {
             addBlueBorderTo(sender)
         }
-        
         
         if selectedCards.count == 3 {
             removeOrangeBorderFromCards()
@@ -131,32 +126,34 @@ class SoloMode: UIViewController {
                 // Grab 3 more cards codes from the deck if the deck allows it
                 if (deck.count >= 3) {
                     var newCodes = loadNextThreeCards()
-                    updateButtonCodesAndImages(codes, newCodes: newCodes)
                     updateCardCodesOnBoard(codes, newCodes: newCodes)
                     
-                    // Find the new sets, and shuffle if needed
-                    var mySets = findSetsOnBoard()
-                    while (mySets.count == 0) {
+                    // Find sets, and shuffle if needed
+                    findSetsOnBoard()
+                    var shuffled = false
+                    while (sets.count == 0 && deck.count >= 3) {
                         shuffleDeck()
-                        mySets = findSetsOnBoard()
+                        findSetsOnBoard()
+                        shuffled = true
                     }
-                    
-                    updateCountersOnBoard()
-                    
+                    if shuffled {
+                        loadAllButtonsCodesAndImages(fromNewGame: shuffled)
+                    } else {
+                        updateButtonCodesAndImages(codes, newCodes: newCodes)
+                    }
+                } else { // There are no more cards on the deck
+                    let newCodes = ["0", "0", "0"]
+                    updateButtonCodesAndImages(codes, newCodes: newCodes)
+                    updateCardCodesOnBoard(codes, newCodes: newCodes)
                 }
-                // There are no more cards on the deck
-                else {
-                    
-                }
-                
-            }
-            // They are not a set
-            else {
+            } else { // The 3 cards were NOT a set
                 for (k, v) in selectedCards {
                     v.shake()
                 }
             }
             removeBlueBorderFromCards()
+            checkIfGameEnded()
+            updateCountersOnBoard()
         }
     }
     
@@ -172,6 +169,7 @@ class SoloMode: UIViewController {
             mySets = findSetsOnBoard()
         }
         
+        loadAllButtonsCodesAndImages(fromNewGame: false)
         updateCountersOnBoard()
     }
     
@@ -191,11 +189,42 @@ class SoloMode: UIViewController {
     }
     
     @IBAction func newgameButtonPressed(sender: AnyObject) {
+        newgameButton.enabled = false
+        newgameButton.fadeOut({
+            self.newgameButton.hidden = true
+        })
+        
+        hintButton.alpha = 0
+        hintButton.hidden = false
+        hintButton.fadeIn()
+        shuffleButton.alpha = 0
+        shuffleButton.hidden = false
+        shuffleButton.fadeIn()
+        
+        startNewGame()
+        
+        loadAllButtonsCodesAndImages(fromNewGame: true)
+        findSetsOnBoard()
+        updateCountersOnBoard()
     }
     
     
     
     // MARK: - Helper Methods
+    
+    func startNewGame() {
+        newDeck.shuffleDeck()
+        deck = newDeck.deck
+        
+        if !cardCodesOnBoard.isEmpty { cardCodesOnBoard.removeAll() }
+        loadCardCodesOnBoard()
+        
+        findSetsOnBoard()
+        while (sets.count == 0) {
+            shuffleDeck()
+            findSetsOnBoard()
+        }
+    }
     
     // Removes the next 12 card codes from deck and adds them into cardCodesOnBoard
     func loadCardCodesOnBoard() {
@@ -206,14 +235,28 @@ class SoloMode: UIViewController {
 
     // Sets the card code to the Button as the button title text
     // and then sets the card image based on the card code just set
-    func loadAllButtonsCodesAndImages() {
+    func loadAllButtonsCodesAndImages(#fromNewGame: Bool) {
         for (i,code) in enumerate(cardCodesOnBoard) {
             cardButtons[i].setTitle(code, forState: .Normal)
-            var cardPath = CardPaths.path[code]!
-            cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+            
+            if fromNewGame {
+                var cardPath = CardPaths.path[code]!
+                cardButtons[i].zoomInAndOut({
+                    self.cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+                    self.cardButtons[i].hidden = false
+                })
+            }else{
+                if code == "0" {
+                    cardButtons[i].hidden = true
+                }else{
+                    var cardPath = CardPaths.path[code]!
+                    cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+                }
+            }
         }
     }
     
+    // Returns the next 3 card codes from the top of deck
     func loadNextThreeCards() -> [String] {
         var next3Cards: [String] = []
         for i in 1...3 {
@@ -227,11 +270,17 @@ class SoloMode: UIViewController {
         for (i,code) in enumerate(oldCodes) {
             var button: UIButton = selectedCards[code]!
             button.setTitle(newCodes[i], forState: .Normal)
-            var cardPath = CardPaths.path[newCodes[i]]!
             
-            button.zoomInAndOut({
-                button.setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
-            })
+            if newCodes[i] == "0" {
+                button.zoomInAndOut({
+                    button.hidden = true
+                })
+            }else{
+                var cardPath = CardPaths.path[newCodes[i]]!
+                button.zoomInAndOut({
+                    button.setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+                })
+            }
         }
     }
     
@@ -270,7 +319,18 @@ class SoloMode: UIViewController {
         // Clear board of card codes and load it again
         cardCodesOnBoard.removeAll()
         loadCardCodesOnBoard()
-        loadAllButtonsCodesAndImages()
+    }
+    
+    func checkIfGameEnded() {
+        findSetsOnBoard()
+        
+        if (deck.count == 0 && sets.count == 0) {
+            hintButton.hidden = true
+            shuffleButton.hidden = true
+            newgameButton.hidden = false
+            newgameButton.enabled = true
+            newgameButton.fadeIn()
+        }
     }
     
     
@@ -415,7 +475,7 @@ extension UIView {
                     self.transform = CGAffineTransformIdentity
                 }
                 completionBlock()
-        })
+            })
     }
     
     func fadeIn() {
@@ -423,10 +483,12 @@ extension UIView {
                 self.alpha = 1.0
             }, completion: nil)
     }
-    func fadeOut() {
+    func fadeOut(completionBlock: ()->Void) {
         UIView.animateWithDuration(0.75, delay: 0.0, options: UIViewAnimationOptions.CurveEaseOut, animations: {
                 self.alpha = 0.0
-            }, completion: nil)
+            }, completion: { finish in
+                completionBlock
+            })
     }
 }
 
