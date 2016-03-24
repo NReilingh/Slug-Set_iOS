@@ -459,7 +459,9 @@
                         <outlet property="cardR3C1" destination="REM-We-6q7" id="adm-7B-de9"/>
                         <outlet property="cardR3C2" destination="fMX-73-pmL" id="6up-HW-sKu"/>
                         <outlet property="cardsOnDeck" destination="2LW-Bu-qnp" id="OBj-SD-h06"/>
+                        <outlet property="hintButton" destination="EwN-8u-WWZ" id="rk8-lM-OUf"/>
                         <outlet property="setsAvailable" destination="aIw-Dx-Bc8" id="FRY-lx-R39"/>
+                        <outlet property="shuffleButton" destination="FHt-eB-G9l" id="65L-N4-5bF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xgg-Cy-3uZ" userLabel="First Responder" sceneMemberID="firstResponder"/>

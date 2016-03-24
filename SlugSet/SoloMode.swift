@@ -29,6 +29,11 @@ class SoloMode: UIViewController {
     @IBOutlet weak var cardR3C2: UIButton!
     var cardButtons: [UIButton]!
     
+    
+    @IBOutlet weak var hintButton: UIButton!
+    @IBOutlet weak var shuffleButton: UIButton!
+    
+    
     var newDeck = Deck()
     var deck: [String] = []
     var cardCodesOnBoard: [String] = []
@@ -51,6 +56,9 @@ class SoloMode: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        hintButton.alpha = 0
+        shuffleButton.alpha = 0
+        
         cardButtons = [cardR0C0,cardR0C1,cardR0C2,cardR1C0,cardR1C1,cardR1C2,
                         cardR2C0,cardR2C1,cardR2C2,cardR3C0,cardR3C1,cardR3C2]
         
@@ -59,7 +67,7 @@ class SoloMode: UIViewController {
             card.layer.borderWidth = 2
             card.layer.borderColor = StyleConstants.grayBorder.CGColor
         }
-        
+
         let defaults = NSUserDefaults.standardUserDefaults()
         let gameInProgress = defaults.boolForKey("gameInProgress")
         
@@ -76,6 +84,11 @@ class SoloMode: UIViewController {
         
         findSetsOnBoard()
         updateCountersOnBoard()
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        hintButton.fadeIn()
+        shuffleButton.fadeIn()
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -215,8 +228,10 @@ class SoloMode: UIViewController {
             var button: UIButton = selectedCards[code]!
             button.setTitle(newCodes[i], forState: .Normal)
             var cardPath = CardPaths.path[newCodes[i]]!
-            button.setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
             
+            button.zoomInAndOut({
+                button.setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+            })
         }
     }
     
@@ -374,15 +389,44 @@ class SoloMode: UIViewController {
 }// End of SoloMode class
 
 
-// Shake function used when the 3 cards selected are not a set
-// http://stackoverflow.com/questions/27987048/shake-animation-for-uitextfield-uiview-in-swift
+
 extension UIView {
+    
+    // Shake animation used when the 3 cards selected are not a set
+    // http://stackoverflow.com/questions/27987048/shake-animation-for-uitextfield-uiview-in-swift
     func shake() {
         let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
         animation.duration = 0.4
         animation.values = [-15.0, 15.0, -5.0, 5.0, 0.0 ]
         layer.addAnimation(animation, forKey: "shake")
+    }
+    
+    // Zoom in and out animation when a set is found and 3 cards get replaced
+    // with completion block to show new images when zooming back in
+    // http://stackoverflow.com/questions/31320819/scale-uibutton-animation-swift
+    func zoomInAndOut(completionBlock: () -> Void) {
+        UIView.animateWithDuration(0.25 ,
+            animations: {
+                self.transform = CGAffineTransformMakeScale(0.1, 0.1)
+            },
+            completion: { finish in
+                UIView.animateWithDuration(0.25){
+                    self.transform = CGAffineTransformIdentity
+                }
+                completionBlock()
+        })
+    }
+    
+    func fadeIn() {
+        UIView.animateWithDuration(0.75, delay: 0.0, options: UIViewAnimationOptions.CurveEaseIn, animations: {
+                self.alpha = 1.0
+            }, completion: nil)
+    }
+    func fadeOut() {
+        UIView.animateWithDuration(0.75, delay: 0.0, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+                self.alpha = 0.0
+            }, completion: nil)
     }
 }
 
