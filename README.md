@@ -2,7 +2,7 @@
 Play solo, multiplayer to be added soon over a node server. iPhone version of the Set Card game.
 <br>
 <br>
-[App Store link](https://itunes.apple.com/us/app/slug-set/id1097010696)
+<b>App Store link:</b> - https://itunes.apple.com/us/app/slug-set/id1097010696
 <br>
 <br>
 
