@@ -64,16 +64,20 @@ class SoloMode: UIViewController {
         for card in cardButtons {
             card.layer.cornerRadius = 10
             card.layer.borderWidth = 2
-            card.layer.borderColor = StyleConstants.grayBorder.CGColor
+            card.layer.borderColor = StyleConstants.grayBorder.cgColor
         }
 
-        let defaults = NSUserDefaults.standardUserDefaults()
-        let gameInProgress = defaults.boolForKey("gameInProgress")
+        let defaults = UserDefaults.standard
+        let gameInProgress = defaults.bool(forKey: "gameInProgress")
         
         if gameInProgress {
-            let data = defaults.objectForKey("savedDeck") as! NSData
-            deck = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: nil) as! [String]
-            loadCardCodesOnBoard()
+            let data = defaults.object(forKey: "savedDeck") as! Data
+            do {
+                deck = try JSONSerialization.jsonObject(with: data) as! [String]
+                loadCardCodesOnBoard()
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+            }
         }else{
             startNewGame()
         }
@@ -83,19 +87,23 @@ class SoloMode: UIViewController {
         updateCountersOnBoard()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         hintButton.fadeIn()
         shuffleButton.fadeIn()
     }
     
-    override func viewWillDisappear(animated: Bool) {
-        let defaults = NSUserDefaults.standardUserDefaults()
-        defaults.setBool(true, forKey: "gameInProgress")
+    override func viewWillDisappear(_ animated: Bool) {
+        let defaults = UserDefaults.standard
+        defaults.set(true, forKey: "gameInProgress")
         
         addCardsOnBoardBackToDeck()
-        let data = NSJSONSerialization.dataWithJSONObject(deck, options: nil, error: nil)
-        defaults.setObject(data, forKey: "savedDeck")
-        defaults.synchronize()
+        do {
+            let data = try JSONSerialization.data(withJSONObject: deck)
+            defaults.set(data, forKey: "savedDeck")
+            defaults.synchronize()
+        } catch let error as NSError {
+            print("Failed to load: \(error.localizedDescription)")
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -106,11 +114,11 @@ class SoloMode: UIViewController {
     
     // MARK: - Button Actions
     
-    @IBAction func goBackPressed(sender: AnyObject) {
-        self.navigationController?.popViewControllerAnimated(true)
+    @IBAction func goBackPressed(_ sender: AnyObject) {
+        self.navigationController?.popViewController(animated: true)
     }
     
-    @IBAction func aCardPressed(sender: UIButton) {
+    @IBAction func aCardPressed(_ sender: UIButton) {
         if sender.tag == 1 {
             removeBlueBorderFrom(sender)
         } else {
@@ -125,7 +133,7 @@ class SoloMode: UIViewController {
             if checkSet(card1: codes[0], card2: codes[1], card3: codes[2]) {
                 // Grab 3 more cards codes from the deck if the deck allows it
                 if (deck.count >= 3) {
-                    var newCodes = loadNextThreeCards()
+                    let newCodes = loadNextThreeCards()
                     updateCardCodesOnBoard(codes, newCodes: newCodes)
                     
                     // Find sets, and shuffle if needed
@@ -147,7 +155,7 @@ class SoloMode: UIViewController {
                     updateCardCodesOnBoard(codes, newCodes: newCodes)
                 }
             } else { // The 3 cards were NOT a set
-                for (k, v) in selectedCards {
+                for (_, v) in selectedCards {
                     v.shake()
                 }
             }
@@ -157,7 +165,7 @@ class SoloMode: UIViewController {
         }
     }
     
-    @IBAction func shuffleButtonPressed(sender: AnyObject) {
+    @IBAction func shuffleButtonPressed(_ sender: AnyObject) {
         removeBlueBorderFromCards()
         removeOrangeBorderFromCards()
         shuffleDeck()
@@ -174,7 +182,7 @@ class SoloMode: UIViewController {
     }
     
     //ONLY shows the first 3 hints of the first set found
-    @IBAction func hintButtonPressed(sender: AnyObject) {
+    @IBAction func hintButtonPressed(_ sender: AnyObject) {
         removeBlueBorderFromCards()
         
         // Remove all hints
@@ -183,22 +191,22 @@ class SoloMode: UIViewController {
         }
         // Show the next hint
         else {
-            hintsShownOnBoard++
+            hintsShownOnBoard += 1
             addOrangeBorderToNextCard()
         }
     }
     
-    @IBAction func newgameButtonPressed(sender: AnyObject) {
-        newgameButton.enabled = false
+    @IBAction func newgameButtonPressed(_ sender: AnyObject) {
+        newgameButton.isEnabled = false
         newgameButton.fadeOut({
-            self.newgameButton.hidden = true
+            self.newgameButton.isHidden = true
         })
         
         hintButton.alpha = 0
-        hintButton.hidden = false
+        hintButton.isHidden = false
         hintButton.fadeIn()
         shuffleButton.alpha = 0
-        shuffleButton.hidden = false
+        shuffleButton.isHidden = false
         shuffleButton.fadeIn()
         
         startNewGame()
@@ -228,29 +236,29 @@ class SoloMode: UIViewController {
     
     // Removes the next 12 card codes from deck and adds them into cardCodesOnBoard
     func loadCardCodesOnBoard() {
-        for i in 1...12 {
-            cardCodesOnBoard.append(deck.removeAtIndex(0))
+        for _ in 1...12 {
+            cardCodesOnBoard.append(deck.remove(at: 0))
         }
     }
 
     // Sets the card code to the Button as the button title text
     // and then sets the card image based on the card code just set
-    func loadAllButtonsCodesAndImages(#fromNewGame: Bool) {
-        for (i,code) in enumerate(cardCodesOnBoard) {
-            cardButtons[i].setTitle(code, forState: .Normal)
+    func loadAllButtonsCodesAndImages(fromNewGame: Bool) {
+        for (i,code) in cardCodesOnBoard.enumerated() {
+            cardButtons[i].setTitle(code, for: UIControlState())
             
             if fromNewGame {
-                var cardPath = CardPaths.path[code]!
+                let cardPath = CardPaths.path[code]!
                 cardButtons[i].zoomInAndOut({
-                    self.cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
-                    self.cardButtons[i].hidden = false
+                    self.cardButtons[i].setBackgroundImage(UIImage(named: cardPath), for: UIControlState())
+                    self.cardButtons[i].isHidden = false
                 })
             }else{
                 if code == "0" {
-                    cardButtons[i].hidden = true
+                    cardButtons[i].isHidden = true
                 }else{
-                    var cardPath = CardPaths.path[code]!
-                    cardButtons[i].setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+                    let cardPath = CardPaths.path[code]!
+                    cardButtons[i].setBackgroundImage(UIImage(named: cardPath), for: UIControlState())
                 }
             }
         }
@@ -259,35 +267,35 @@ class SoloMode: UIViewController {
     // Returns the next 3 card codes from the top of deck
     func loadNextThreeCards() -> [String] {
         var next3Cards: [String] = []
-        for i in 1...3 {
-            next3Cards.append(deck.removeAtIndex(0))
+        for _ in 1...3 {
+            next3Cards.append(deck.remove(at: 0))
         }
         return next3Cards
     }
     
-    func updateButtonCodesAndImages(oldCodes:[String], newCodes:[String]) {
+    func updateButtonCodesAndImages(_ oldCodes:[String], newCodes:[String]) {
         // Iterate through the old codes (the selected cards) and update the buttons with the new codes and images
-        for (i,code) in enumerate(oldCodes) {
-            var button: UIButton = selectedCards[code]!
-            button.setTitle(newCodes[i], forState: .Normal)
+        for (i,code) in oldCodes.enumerated() {
+            let button: UIButton = selectedCards[code]!
+            button.setTitle(newCodes[i], for: UIControlState())
             
             if newCodes[i] == "0" {
                 button.zoomInAndOut({
-                    button.hidden = true
+                    button.isHidden = true
                 })
             }else{
-                var cardPath = CardPaths.path[newCodes[i]]!
+                let cardPath = CardPaths.path[newCodes[i]]!
                 button.zoomInAndOut({
-                    button.setBackgroundImage(UIImage(named: cardPath), forState: .Normal)
+                    button.setBackgroundImage(UIImage(named: cardPath), for: UIControlState())
                 })
             }
         }
     }
     
     // Iterates through the old codes (selected cards) and traverses the array of buttons, once it finds the old code it replaces it with the new one
-    func updateCardCodesOnBoard(oldCodes:[String], newCodes:[String]) {
-        for (i, oldCode) in enumerate(oldCodes) {
-            for (j, code) in enumerate(cardCodesOnBoard) {
+    func updateCardCodesOnBoard(_ oldCodes:[String], newCodes:[String]) {
+        for (i, oldCode) in oldCodes.enumerated() {
+            for (j, code) in cardCodesOnBoard.enumerated() {
                 if code == oldCode {
                     cardCodesOnBoard[j] = newCodes[i]
                     break
@@ -303,9 +311,9 @@ class SoloMode: UIViewController {
     
     func addCardsOnBoardBackToDeck() {
         // Need to reverse the order to add them in correct order on top of deck
-        let board = cardCodesOnBoard.reverse()
+        let board = cardCodesOnBoard.reversed()
         for card in board {
-            deck.insert(card, atIndex: 0)
+            deck.insert(card, at: 0)
         }
     }
     
@@ -325,10 +333,10 @@ class SoloMode: UIViewController {
         findSetsOnBoard()
         
         if (deck.count == 0 && sets.count == 0) {
-            hintButton.hidden = true
-            shuffleButton.hidden = true
-            newgameButton.hidden = false
-            newgameButton.enabled = true
+            hintButton.isHidden = true
+            shuffleButton.isHidden = true
+            newgameButton.isHidden = false
+            newgameButton.isEnabled = true
             newgameButton.fadeIn()
         }
     }
@@ -336,19 +344,19 @@ class SoloMode: UIViewController {
     
     // MARK: Color Border Logic
     
-    func addBlueBorderTo(button: UIButton) {
-        button.layer.borderColor = StyleConstants.blueBorder.CGColor
+    func addBlueBorderTo(_ button: UIButton) {
+        button.layer.borderColor = StyleConstants.blueBorder.cgColor
         button.tag = 1
         
         // Add the key-value ("code":Button) to the Dict
         selectedCards[button.currentTitle!] = button
     }
     
-    func removeBlueBorderFrom(button: UIButton) {
-        button.layer.borderColor = StyleConstants.grayBorder.CGColor
+    func removeBlueBorderFrom(_ button: UIButton) {
+        button.layer.borderColor = StyleConstants.grayBorder.cgColor
         button.tag = 0
         
-        selectedCards.removeValueForKey(button.currentTitle!)
+        selectedCards.removeValue(forKey: button.currentTitle!)
     }
     
     func removeBlueBorderFromCards() {
@@ -358,7 +366,7 @@ class SoloMode: UIViewController {
         if !codes.isEmpty {
             for code in codes {
                 selectedCards[code]!.tag = 0
-                selectedCards[code]!.layer.borderColor = StyleConstants.grayBorder.CGColor
+                selectedCards[code]!.layer.borderColor = StyleConstants.grayBorder.cgColor
             }
         }
         selectedCards.removeAll()
@@ -367,7 +375,7 @@ class SoloMode: UIViewController {
     func addOrangeBorderToNextCard() {
         for button in cardButtons {
             if button.currentTitle! == sets[hintsShownOnBoard] {
-                button.layer.borderColor = StyleConstants.orangeBorder.CGColor
+                button.layer.borderColor = StyleConstants.orangeBorder.cgColor
                 button.tag = 0
                 button.shake()
                 break
@@ -377,10 +385,10 @@ class SoloMode: UIViewController {
     
     func removeOrangeBorderFromCards() {
         if hintsShownOnBoard >= 0 {
-            for (var i=0; i<=hintsShownOnBoard; i++) {
+            for i in 0...hintsShownOnBoard {
                 for button in cardButtons {
                     if button.currentTitle! == sets[i] {
-                        button.layer.borderColor = StyleConstants.grayBorder.CGColor
+                        button.layer.borderColor = StyleConstants.grayBorder.cgColor
                         break
                     }
                 }
@@ -394,6 +402,7 @@ class SoloMode: UIViewController {
     
     // Finds and returns all sets on current board
     // Updates the counter of number of sets available
+    @discardableResult
     func findSetsOnBoard() -> [String] {
         countOfSets = 0
         var set: Bool
@@ -402,47 +411,49 @@ class SoloMode: UIViewController {
         if (!sets.isEmpty) { sets.removeAll() }
         
         // Iterating over List of 12 cards with 3 different cursors
-        for (var spot1=0; spot1<cardCodesOnBoard.count-2; spot1++){ // First cursor starts at index 0
-            for (var spot2=spot1+1; spot2<cardCodesOnBoard.count-1; spot2++){ // Second cursor starts at first+1
-                for (var spot3=spot2+1; spot3<cardCodesOnBoard.count; spot3++){ // Third cursor starts at second+1
+        for spot1 in 0 ..< cardCodesOnBoard.count-2 { // First cursor starts at index 0
+            for spot2 in spot1+1 ..< cardCodesOnBoard.count-1 { // Second cursor starts at first+1
+                for spot3 in spot2+1 ..< cardCodesOnBoard.count { // Third cursor starts at second+1
                     
                     // Checking all combinations of 3 cards
                     set = checkSet(card1: cardCodesOnBoard[spot1], card2: cardCodesOnBoard[spot2], card3: cardCodesOnBoard[spot3])
                     
                     //If set found add it to List of sets
                     if (set) {
-                        println("it is a set: \(cardCodesOnBoard[spot1]) \(cardCodesOnBoard[spot2]) \(cardCodesOnBoard[spot3])")
+                        print("it is a set: \(cardCodesOnBoard[spot1]) \(cardCodesOnBoard[spot2]) \(cardCodesOnBoard[spot3])")
                         sets.append(cardCodesOnBoard[spot1])
                         sets.append(cardCodesOnBoard[spot2])
                         sets.append(cardCodesOnBoard[spot3])
                         
-                        countOfSets++;
+                        countOfSets += 1;
                     }
                 }
             }
         }
-        println()
+        print()
         return sets
     }
     
     // Check all 4 attributes of cards one by one and check
     // to see if they are all the same or all different
-    func checkSet(#card1: String, card2: String, card3: String) -> Bool {
+    func checkSet(card1: String, card2: String, card3: String) -> Bool {
         if (card1 == "0" || card2 == "0" || card3 == "0") {
             return false
         }
         var set = true
         let abcd = "abcd" // String with 4 chars for counting index in for-loop
-        for ( var i=0; (set && i<4); i++) {
-            var index = advance(abcd.startIndex, i)
-            set = checkAttributes(a: card1[index], b: card2[index], c: card3[index])
+        for i in 0...3 {
+            if !set {
+                let index = abcd.index(abcd.startIndex, offsetBy: i)
+                set = checkAttributes(a: card1[index], b: card2[index], c: card3[index])
+            }
         }
         
         return set
     }
     
     // Check whether the passed attribute is the same or different for all 3 cards
-    func checkAttributes(#a: Character, b: Character, c: Character) -> Bool {
+    func checkAttributes(a: Character, b: Character, c: Character) -> Bool {
         return ( (a == b && a == c) || ((a != b) && (a != c) && (b != c)) )
     }
     
@@ -459,35 +470,35 @@ extension UIView {
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
         animation.duration = 0.4
         animation.values = [-15.0, 15.0, -5.0, 5.0, 0.0 ]
-        layer.addAnimation(animation, forKey: "shake")
+        layer.add(animation, forKey: "shake")
     }
     
     // Zoom in and out animation when a set is found and 3 cards get replaced
     // with completion block to show new images when zooming back in
     // http://stackoverflow.com/questions/31320819/scale-uibutton-animation-swift
-    func zoomInAndOut(completionBlock: () -> Void) {
-        UIView.animateWithDuration(0.25 ,
+    func zoomInAndOut(_ completionBlock: @escaping () -> Void) {
+        UIView.animate(withDuration: 0.25 ,
             animations: {
-                self.transform = CGAffineTransformMakeScale(0.1, 0.1)
+                self.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
             },
             completion: { finish in
-                UIView.animateWithDuration(0.25){
-                    self.transform = CGAffineTransformIdentity
-                }
+                UIView.animate(withDuration: 0.25, animations: {
+                    self.transform = CGAffineTransform.identity
+                })
                 completionBlock()
             })
     }
     
     func fadeIn() {
-        UIView.animateWithDuration(0.75, delay: 0.0, options: UIViewAnimationOptions.CurveEaseIn, animations: {
+        UIView.animate(withDuration: 0.75, delay: 0.0, options: UIViewAnimationOptions.curveEaseIn, animations: {
                 self.alpha = 1.0
             }, completion: nil)
     }
-    func fadeOut(completionBlock: ()->Void) {
-        UIView.animateWithDuration(0.75, delay: 0.0, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+    func fadeOut(_ completionBlock: @escaping ()->Void) {
+        UIView.animate(withDuration: 0.75, delay: 0.0, options: UIViewAnimationOptions.curveEaseOut, animations: {
                 self.alpha = 0.0
             }, completion: { finish in
-                completionBlock
+                completionBlock()
             })
     }
 }

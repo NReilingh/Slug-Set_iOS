@@ -28,8 +28,8 @@ class HowToPlay: UIViewController {
         
         cardFeaturesContainerHeight.constant = view.bounds.size.height * 0.42
         featureHeight = view.bounds.size.height * featureHeightScale
-        println(cardFeaturesContainer.bounds.size.height)
-        println(featureHeight)
+        print(cardFeaturesContainer.bounds.size.height)
+        print(featureHeight)
         
         feature1Top.constant = (featureHeight * featuresConstraintScale)
         feature2Top.constant = (featureHeight * featuresConstraintScale)
@@ -39,11 +39,11 @@ class HowToPlay: UIViewController {
         exampleSetsContainerHeight.constant = view.bounds.size.height * 0.34
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         // featureHeightScale was found by first printing cardFeatureContainer
         // to see the real runtime size, then dividing it by the view height
         // featureHeightScale <- cardFeatureHeight / viewHeight
-        println(cardFeaturesContainer.bounds.size.height)
+        print(cardFeaturesContainer.bounds.size.height)
     }
 
     override func didReceiveMemoryWarning() {
@@ -51,8 +51,8 @@ class HowToPlay: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func goBackPressed(sender: AnyObject) {
-        self.navigationController?.popViewControllerAnimated(true)
+    @IBAction func goBackPressed(_ sender: AnyObject) {
+        self.navigationController?.popViewController(animated: true)
     }
 
 }

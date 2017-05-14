@@ -20,8 +20,8 @@ class MainScreen: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    @IBAction func soloButtonPressed(sender: AnyObject) {
-        performSegueWithIdentifier("toSoloMode", sender: self)
+    @IBAction func soloButtonPressed(_ sender: AnyObject) {
+        performSegue(withIdentifier: "toSoloMode", sender: self)
     }
 
 }

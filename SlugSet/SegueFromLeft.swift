@@ -14,20 +14,20 @@ class SegueFromLeft: UIStoryboardSegue
 {
     override func perform()
     {
-        let src: UIViewController = self.sourceViewController as! UIViewController
-        let dst: UIViewController = self.destinationViewController as! UIViewController
+        let src: UIViewController = self.source 
+        let dst: UIViewController = self.destination 
         
         src.view.superview?.insertSubview(dst.view, aboveSubview: src.view)
-        dst.view.transform = CGAffineTransformMakeTranslation(-src.view.frame.size.width, 0)
+        dst.view.transform = CGAffineTransform(translationX: -src.view.frame.size.width, y: 0)
         
-        UIView.animateWithDuration(0.33,
+        UIView.animate(withDuration: 0.33,
             delay: 0.0,
-            options: UIViewAnimationOptions.CurveEaseInOut,
+            options: UIViewAnimationOptions(),
             animations: {
-                dst.view.transform = CGAffineTransformMakeTranslation(0, 0)
+                dst.view.transform = CGAffineTransform(translationX: 0, y: 0)
             },
             completion: { finished in
-                src.presentViewController(dst, animated: false, completion: nil)
+                src.present(dst, animated: false, completion: nil)
             }
         )
     }
