@@ -443,7 +443,7 @@ class SoloMode: UIViewController {
         var set = true
         let abcd = "abcd" // String with 4 chars for counting index in for-loop
         for i in 0...3 {
-            if !set {
+            if set {
                 let index = abcd.index(abcd.startIndex, offsetBy: i)
                 set = checkAttributes(a: card1[index], b: card2[index], c: card3[index])
             }
